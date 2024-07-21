@@ -1,0 +1,30 @@
+---
+- name: Install Apache HTTP Server on macOS
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Ensure Homebrew is installed
+      homebrew:
+        name: homebrew
+        state: present
+
+    - name: Install Apache HTTP Server
+      homebrew:
+        name: httpd
+        state: present
+
+    - name: Start Apache service
+      homebrew_service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Ensure Apache is listening on port 80
+      command: |
+        lsof -i :80
+      register: apache_status
+      failed_when: "'httpd' not in apache_status.stdout"
+
+    - name: Output Apache status
+      debug:
+        msg: "Apache HTTP Server is installed and running."
